@@ -1,10 +1,10 @@
-import telebot
+        import telebot
 import json
 import random
 import time
 import os
 
-TOKEN = os.getenv("8969615907:AAGsc6mue_Xo567cyOpPkhiZN3Af1EYdtWQ")
+TOKEN = "8969615907:AAGsc6mue_Xo567cyOpPkhiZN3Af1EYdtWQ"
 bot = telebot.TeleBot(TOKEN)
 
 DATA_FILE = "users.json"
@@ -23,7 +23,7 @@ cards = [
     {"name":"Ворон","eng":"Crow","rarity":"Легендарный","emoji":"🟨","class":"Убийца","female":False}
 ]
 
-# ---------- DATA ----------
+# ---------- LOAD / SAVE ----------
 
 def load():
     if not os.path.exists(DATA_FILE):
@@ -39,6 +39,7 @@ def save(data):
 
 def get_user(data, uid, message):
     user = message.from_user
+
     name = "@" + user.username if user.username else user.first_name
 
     if uid not in data:
@@ -51,7 +52,7 @@ def get_user(data, uid, message):
     data[uid]["name"] = name
     return data[uid]
 
-# ---------- GIVE CARD ----------
+# ---------- OPEN CARD ----------
 
 def give_card(message):
     data = load()
@@ -84,7 +85,7 @@ def give_card(message):
     bot.reply_to(message,
         f"{prefix} {word} {card['name']} - {card['eng']}\n\n"
         f"{card['emoji']} Редкость: {card['rarity']}\n"
-        f"⚔️ Класс: {card['class']}"
+        f"⚔️ Класс бравлера: {card['class']}"
     )
 
 # ---------- INVENTORY ----------
@@ -113,10 +114,14 @@ def inventory(message):
 def show_top(message):
     data = load()
 
+    if not data:
+        bot.reply_to(message, "🏆 СПИСКИ ЛИДЕРОВ:\n\nПока нет игроков")
+        return
+
     players = []
 
     for uid, info in data.items():
-        name = info.get("name", "Игрок")
+        name = info.get("name", "Без имени")
         count = len(info.get("inventory", []))
         players.append((name, count))
 
@@ -136,8 +141,8 @@ def start(message):
     bot.reply_to(message,
         "🎴 БОТ КАРТОЧЕК BRAWL STARS\n\n"
         "🃏 Brawlers Cards — открыть карточку\n"
-        "📦 Мои карточки — коллекция\n"
-        "🏆 Списки лидеров — топ игроков"
+        "📦 Мои карточки — посмотреть коллекцию\n"
+        "🏆 Списки лидеров — рейтинг игроков"
     )
 
 @bot.message_handler(func=lambda m: m.text and m.text.lower() == "brawlers cards")
